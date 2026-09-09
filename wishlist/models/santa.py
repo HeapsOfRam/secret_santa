@@ -1,14 +1,14 @@
 from pathlib import Path
-from pydantic import BaseModel
 
 from typing import Self
 import yaml
 
 from .person import Person
 from .relationships import Relationship
+from .yaml import YamlModel
 
 
-class SecretSantaConfig(BaseModel):
+class SecretSantaConfig(YamlModel):
     people: list[Person]
     relationships: list[Relationship]
 

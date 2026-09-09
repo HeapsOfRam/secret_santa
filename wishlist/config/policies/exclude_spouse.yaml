@@ -1,0 +1,12 @@
+exclude_self: true
+
+excluded_relationship_types:
+  - spouse
+  - dating
+
+avoid_previous_years: 0
+
+prevent_reciprocal_pairs: false
+
+giver_draw_mode: "without_replacement"
+recipient_draw_mode: "without_replacement"
