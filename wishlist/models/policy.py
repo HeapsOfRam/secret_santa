@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import StrEnum
 
 from pydantic import Field
 
@@ -6,15 +6,15 @@ from .relationships import RelationshipType
 from .yaml import YamlModel
 
 
-class DrawMode(str, Enum):
+class DrawMode(StrEnum):
     WITH_REPLACEMENT = "with_replacement"
     WITHOUT_REPLACEMENT = "without_replacement"
 
 
 class SecretSantaPolicy(YamlModel):
     exclude_self: bool = True
-    excuded_relationship_types: set[RelationshipType] = Field(
-        default_factory=list
+    excluded_relationship_types: set[RelationshipType] = Field(
+        default_factory=set
     )
     avoid_previous_years: int = 0
     prevent_reciprocal_pairs: bool = False

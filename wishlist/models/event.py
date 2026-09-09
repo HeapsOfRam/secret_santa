@@ -3,10 +3,14 @@ import random
 from pydantic import BaseModel, Field
 
 from .assignment import Assignment
+from .config import SecretSantaConfig
 from .person import Person
 from .policy import DrawMode, SecretSantaPolicy
 from .relationships import Relationship
-from .santa import SecretSantaConfig
+
+
+class AssignmentAttemptFailed(Exception):
+    pass
 
 
 class SecretSantaEvent(BaseModel):
@@ -26,7 +30,7 @@ class SecretSantaEvent(BaseModel):
             return False
 
         if any(
-                relationship in self.policy.excuded_relationship_types
+                relationship.type in self.policy.excluded_relationship_types
                 for relationship in self.relationships_between(giver, recipient)
         ):
             return False
@@ -59,15 +63,13 @@ class SecretSantaEvent(BaseModel):
 
         if self.policy.giver_draw_mode == DrawMode.WITHOUT_REPLACEMENT:
             if any(
-                    assignment.recipient.id == recipient.id
-                    for assignment in self.assignments
+                    assignment.giver.id == giver.id for assignment in self.assignments
             ):
                 return False
 
         if self.policy.recipient_draw_mode == DrawMode.WITHOUT_REPLACEMENT:
             if any(
-                    assignment.giver.id == giver.id
-                    for assignment in self.assignments
+                    assignment.recipient.id == recipient.id for assignment in self.assignments
             ):
                 return False
 
@@ -80,12 +82,45 @@ class SecretSantaEvent(BaseModel):
         self.assignments.append(assignment)
         return assignment
 
-    def generate_assignments(self) -> list[Assignment]:
+    def _attempt_generate_assignments(self) -> list[Assignment]:
+        assignments: list[Assignment] = []
+
         for recipient in self.config.people:
             potential_givers = self.valid_givers_for(recipient)
-            while not (self.recipient_is_assigned(recipient)):
-                giver_candidate = random.choice(potential_givers)
-                if self.can_assign(giver_candidate, recipient):
-                    self.assign(giver_candidate, recipient)
+            candidate_givers = [
+                giver
+                for giver in potential_givers
+                if not any(assignment.giver.id == giver.id for assignment in assignments)
+            ]
+
+            if not candidate_givers:
+                raise AssignmentAttemptFailed
+
+            giver_candidate = random.choice(candidate_givers)
+            assignments.append(Assignment(giver=giver_candidate, recipient=recipient))
+
+        return assignments
+
+    def generate_assignments(self) -> list[Assignment]:
+        if self.assignments:
+            raise ValueError(
+                "Cannot generate assignments for an event that already has assignments"
+            )
+
+        if (
+                self.policy.giver_draw_mode != DrawMode.WITHOUT_REPLACEMENT
+                or self.policy.recipient_draw_mode != DrawMode.WITHOUT_REPLACEMENT
+        ):
+            raise ValueError("Only without_replacement draw modes are currently supported")
+
+        # TODO: detect misconfigurations to avoid infinite loops (eg all relationships excluded)
+        while not self.assignments:
+            try:
+                self.assignments = self._attempt_generate_assignments()
+            except AssignmentAttemptFailed:
+                print("Draw attempt could not be completed; retrying.")
 
         return self.assignments
+
+    def clear_assignments(self):
+        self.assignments = []
