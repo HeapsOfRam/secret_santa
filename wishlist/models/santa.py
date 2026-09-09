@@ -1,6 +1,6 @@
 from pathlib import Path
-
 from typing import Self
+
 import yaml
 
 from .person import Person

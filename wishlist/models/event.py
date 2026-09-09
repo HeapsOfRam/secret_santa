@@ -1,12 +1,13 @@
-from pydantic import BaseModel, Field
-
 import random
+
+from pydantic import BaseModel, Field
 
 from .assignment import Assignment
 from .person import Person
 from .policy import DrawMode, SecretSantaPolicy
 from .relationships import Relationship
 from .santa import SecretSantaConfig
+
 
 class SecretSantaEvent(BaseModel):
     config: SecretSantaConfig
@@ -25,8 +26,8 @@ class SecretSantaEvent(BaseModel):
             return False
 
         if any(
-            relationship in self.policy.excuded_relationship_types
-            for relationship in self.relationships_between(giver, recipient)
+                relationship in self.policy.excuded_relationship_types
+                for relationship in self.relationships_between(giver, recipient)
         ):
             return False
 
@@ -58,15 +59,15 @@ class SecretSantaEvent(BaseModel):
 
         if self.policy.giver_draw_mode == DrawMode.WITHOUT_REPLACEMENT:
             if any(
-                assignment.recipient.id == recipient.id
-                for assignment in self.assignments
+                    assignment.recipient.id == recipient.id
+                    for assignment in self.assignments
             ):
                 return False
 
         if self.policy.recipient_draw_mode == DrawMode.WITHOUT_REPLACEMENT:
             if any(
-                assignment.giver.id == giver.id
-                for assignment in self.assignments
+                    assignment.giver.id == giver.id
+                    for assignment in self.assignments
             ):
                 return False
 
@@ -82,11 +83,9 @@ class SecretSantaEvent(BaseModel):
     def generate_assignments(self) -> list[Assignment]:
         for recipient in self.config.people:
             potential_givers = self.valid_givers_for(recipient)
-            while not(self.recipient_is_assigned(recipient)):
+            while not (self.recipient_is_assigned(recipient)):
                 giver_candidate = random.choice(potential_givers)
                 if self.can_assign(giver_candidate, recipient):
                     self.assign(giver_candidate, recipient)
 
         return self.assignments
-
-

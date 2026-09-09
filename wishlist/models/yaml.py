@@ -1,7 +1,9 @@
 from pathlib import Path
-from pydantic import BaseModel
 from typing import Self
+
 import yaml
+from pydantic import BaseModel
+
 
 class YamlModel(BaseModel):
     @classmethod

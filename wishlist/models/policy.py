@@ -1,4 +1,5 @@
 from enum import Enum
+
 from pydantic import Field
 
 from .relationships import RelationshipType
@@ -8,6 +9,7 @@ from .yaml import YamlModel
 class DrawMode(str, Enum):
     WITH_REPLACEMENT = "with_replacement"
     WITHOUT_REPLACEMENT = "without_replacement"
+
 
 class SecretSantaPolicy(YamlModel):
     exclude_self: bool = True

@@ -1,10 +1,6 @@
-from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
-import yaml
 
 from wishlist.constants import app_constants
-from wishlist.models.person import Person
-from wishlist.models.relationships import Relationship
 
 
 class AppSettings(BaseSettings):

@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from wishlist.settings import AppSettings
 from wishlist.models import SecretSantaConfig, SecretSantaEvent, SecretSantaPolicy
+from wishlist.settings import AppSettings
 
 
 def main():
