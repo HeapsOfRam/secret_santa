@@ -6,7 +6,7 @@ excluded_relationship_types:
 
 avoid_previous_years: 0
 
-prevent_reciprocal_pairs: false
+prevent_reciprocal_pairs: true
 
 giver_draw_mode: "without_replacement"
 recipient_draw_mode: "without_replacement"
