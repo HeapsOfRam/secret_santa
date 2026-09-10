@@ -2,6 +2,7 @@ from pathlib import Path
 
 from wishlist.models import SecretSantaConfig, SecretSantaEvent, SecretSantaPolicy
 from wishlist.settings import AppSettings
+from wishlist.view import AssignmentWriter, MermaidFlowRenderer
 
 
 def main():
@@ -16,8 +17,13 @@ def main():
         config=santa_list,
         policy=policy
     )
+    assignments = event.generate_assignments()
 
-    print(event.generate_assignments())
+    print(assignments)
+
+    writer = AssignmentWriter(MermaidFlowRenderer())
+    writer.write(assignments)
+
 
 
 if __name__ == "__main__":
