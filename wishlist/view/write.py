@@ -2,6 +2,7 @@ import datetime
 from pathlib import Path
 
 from wishlist.models import Assignment
+from wishlist.settings import settings
 
 from .render import MermaidFlowRenderer
 
@@ -13,7 +14,7 @@ class AssignmentWriter:
     def write(self, assignments: list[Assignment]) -> Path:
         graph = self.renderer.render_assignments(assignments)
 
-        runs_dir = Path("runs/auto")
+        runs_dir = Path(settings.run_storage_path)
         runs_dir.mkdir(parents=True, exist_ok=True)
 
         output_path = runs_dir / f"{int(datetime.datetime.now().timestamp() * 100)}.md"
