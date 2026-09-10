@@ -136,7 +136,7 @@ def test_generate_assignments_prevents_reciprocal_pairs() -> None:
 
 def test_policy_yaml_loads_reciprocal_pair_setting() -> None:
     policy = SecretSantaPolicy.from_yaml(
-        Path("wishlist/config/policies/exclude_spouse.yaml")
+        Path("config/policies/exclude_spouse.yaml")
     )
 
     assert policy.prevent_reciprocal_pairs
