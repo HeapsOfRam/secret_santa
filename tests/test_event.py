@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from wishlist.models import (
@@ -95,3 +97,46 @@ def test_can_assign_limits_each_giver_and_recipient_without_replacement() -> Non
 
     assert not event.can_assign(alice, cora)
     assert not event.can_assign(cora, bob)
+
+
+def test_can_assign_rejects_a_reciprocal_pair_when_policy_enabled() -> None:
+    alice, bob = person("alice"), person("bob")
+    event = SecretSantaEvent(
+        config=SecretSantaConfig(people=[alice, bob], relationships=[]),
+        policy=SecretSantaPolicy(prevent_reciprocal_pairs=True),
+        assignments=[Assignment(giver=bob, recipient=alice)],
+    )
+
+    assert not event.can_assign(alice, bob)
+
+
+def test_can_assign_allows_a_reciprocal_pair_when_policy_disabled() -> None:
+    alice, bob = person("alice"), person("bob")
+    event = SecretSantaEvent(
+        config=SecretSantaConfig(people=[alice, bob], relationships=[]),
+        policy=SecretSantaPolicy(prevent_reciprocal_pairs=False),
+        assignments=[Assignment(giver=bob, recipient=alice)],
+    )
+
+    assert event.can_assign(alice, bob)
+
+
+def test_generate_assignments_prevents_reciprocal_pairs() -> None:
+    people = [person(person_id) for person_id in ("alice", "bob", "cora")]
+    event = SecretSantaEvent(
+        config=SecretSantaConfig(people=people, relationships=[]),
+        policy=SecretSantaPolicy(prevent_reciprocal_pairs=True),
+    )
+
+    assignments = event.generate_assignments()
+    pairs = {(assignment.giver.id, assignment.recipient.id) for assignment in assignments}
+
+    assert all((recipient, giver) not in pairs for giver, recipient in pairs)
+
+
+def test_policy_yaml_loads_reciprocal_pair_setting() -> None:
+    policy = SecretSantaPolicy.from_yaml(
+        Path("config/policies/exclude_spouse.yaml")
+    )
+
+    assert policy.prevent_reciprocal_pairs
